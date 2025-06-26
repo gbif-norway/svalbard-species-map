@@ -147,16 +147,16 @@ def create_species_map(species_name, grid_counts, lons, lats, output_path):
     # Create meshgrid for plotting
     lon_mesh, lat_mesh = np.meshgrid(lons, lats)
     
-    # Create custom colormap (white to red)
-    colors = ['white', 'yellow', 'orange', 'red']
+    # Create custom colormap (orange to red for better visibility of low counts)
+    colors = ['orange', 'red', 'darkred']
     n_bins = 100
     cmap = LinearSegmentedColormap.from_list('species_cmap', colors, N=n_bins)
     
     # Normalize data for better visualization
     max_count = np.max(grid_counts)
     if max_count > 0:
-        # Use log scale for better visualization of varying densities
-        norm = LogNorm(vmin=1, vmax=max_count)
+        # Use linear scale from 1 to max_count for better visibility
+        norm = plt.Normalize(vmin=1, vmax=max_count)
     else:
         norm = plt.Normalize(vmin=0, vmax=1)
     
@@ -165,9 +165,31 @@ def create_species_map(species_name, grid_counts, lons, lats, output_path):
                       transform=ccrs.PlateCarree(),
                       cmap=cmap, norm=norm, alpha=0.7)
     
-    # Add colorbar
+    # Add colorbar with actual numbers
     cbar = plt.colorbar(im, ax=ax, shrink=0.8, pad=0.02)
     cbar.set_label('Number of Occurrences', fontsize=12)
+    
+    # Format colorbar ticks to show actual numbers from 1 to max_count
+    if max_count > 0:
+        # Create tick positions for the colorbar
+        if max_count <= 10:
+            # For small counts, show every integer from 1 to max_count
+            tick_positions = np.arange(1, max_count + 1)
+        elif max_count <= 50:
+            # For medium counts, show 1 and then every 5th number
+            tick_positions = np.concatenate([[1], np.arange(5, max_count + 1, 5)])
+            if max_count not in tick_positions:
+                tick_positions = np.append(tick_positions, max_count)
+        else:
+            # For large counts, show 1, some intermediate values, and max_count
+            tick_positions = np.concatenate([[1], np.linspace(5, max_count-5, 4).astype(int), [max_count]])
+        
+        # Ensure we don't exceed max_count and remove duplicates
+        tick_positions = np.unique(tick_positions[tick_positions <= max_count])
+        
+        # Set the ticks and format them as integers
+        cbar.set_ticks(tick_positions)
+        cbar.set_ticklabels([str(int(tick)) for tick in tick_positions])
     
     # Add title
     plt.title(f'Distribution of {species_name}\nSvalbard Region ({MAP_RESOLUTION_KM}km resolution)', 
@@ -288,15 +310,16 @@ def create_combined_map(df, lons, lats):
     # Create meshgrid for plotting
     lon_mesh, lat_mesh = np.meshgrid(lons, lats)
     
-    # Create custom colormap
-    colors = ['white', 'yellow', 'orange', 'red', 'darkred']
+    # Create custom colormap (orange to red for better visibility of low counts)
+    colors = ['orange', 'red', 'darkred']
     n_bins = 100
     cmap = LinearSegmentedColormap.from_list('combined_cmap', colors, N=n_bins)
     
     # Normalize data
     max_count = np.max(grid_counts)
     if max_count > 0:
-        norm = LogNorm(vmin=1, vmax=max_count)
+        # Use linear scale from 1 to max_count for better visibility
+        norm = plt.Normalize(vmin=1, vmax=max_count)
     else:
         norm = plt.Normalize(vmin=0, vmax=1)
     
@@ -305,9 +328,31 @@ def create_combined_map(df, lons, lats):
                       transform=ccrs.PlateCarree(),
                       cmap=cmap, norm=norm, alpha=0.7)
     
-    # Add colorbar
+    # Add colorbar with actual numbers
     cbar = plt.colorbar(im, ax=ax, shrink=0.8, pad=0.02)
     cbar.set_label('Total Occurrences (All Species)', fontsize=12)
+    
+    # Format colorbar ticks to show actual numbers from 1 to max_count
+    if max_count > 0:
+        # Create tick positions for the colorbar
+        if max_count <= 10:
+            # For small counts, show every integer from 1 to max_count
+            tick_positions = np.arange(1, max_count + 1)
+        elif max_count <= 50:
+            # For medium counts, show 1 and then every 5th number
+            tick_positions = np.concatenate([[1], np.arange(5, max_count + 1, 5)])
+            if max_count not in tick_positions:
+                tick_positions = np.append(tick_positions, max_count)
+        else:
+            # For large counts, show 1, some intermediate values, and max_count
+            tick_positions = np.concatenate([[1], np.linspace(5, max_count-5, 4).astype(int), [max_count]])
+        
+        # Ensure we don't exceed max_count and remove duplicates
+        tick_positions = np.unique(tick_positions[tick_positions <= max_count])
+        
+        # Set the ticks and format them as integers
+        cbar.set_ticks(tick_positions)
+        cbar.set_ticklabels([str(int(tick)) for tick in tick_positions])
     
     # Add title
     plt.title(f'Combined Species Distribution\nSvalbard Region ({MAP_RESOLUTION_KM}km resolution)', 
