@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  gbif-downloader:
+    build: .
+    container_name: svalbard-species-downloader
+    volumes:
+      # Mount entire project directory for live development
+      - .:/app
+      # Ensure data directory persists
+      - ./data:/app/data
+      # Ensure logs directory persists
+      - ./logs:/app/logs
+      
+    env_file:
+      - .env
+    environment:
+      - GBIF_USERNAME=${GBIF_USERNAME:-your_email@example.com}
+      - GBIF_PASSWORD=${GBIF_PASSWORD:-your_password}
+    command: python download_gbif_data.py
+    restart: "no" 
