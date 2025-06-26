@@ -11,11 +11,15 @@ RUN conda install -c conda-forge \
     requests \
     tqdm \
     pygbif \
+    matplotlib \
+    cartopy \
+    numpy \
+    shapely \
     -y \
     && conda clean -afy
 
 # Create data and logs directories
-RUN mkdir -p data logs
+RUN mkdir -p data logs data/maps
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1

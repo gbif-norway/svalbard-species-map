@@ -35,9 +35,23 @@ SPECIES = [
     "Catablema vesicarium"
 ]
 
+# Map configuration for Svalbard region
+SVALBARD_BOUNDS = {
+    'min_lon': 10.0,   # Western boundary
+    'max_lon': 35.0,   # Eastern boundary
+    'min_lat': 74.0,   # Southern boundary
+    'max_lat': 81.0    # Northern boundary
+}
+
+# Map resolution settings
+MAP_RESOLUTION_KM = 20  # 20km x 20km grid cells
+MAP_DPI = 300  # High resolution for publication
+MAP_FORMAT = 'png'  # Output format
+
 # File paths
 DATA_DIR = Path("data")
 LOGS_DIR = Path("logs")
+MAPS_DIR = Path("data/maps")  # Directory for generated maps
 
 def validate_config():
     """Validate that GBIF credentials are properly configured."""

@@ -237,6 +237,21 @@ def main():
         logging.info("Download complete with DOI!")
         logging.info(f"Combined data saved to: {combined_file}")
         logging.info("Citation information saved to: data/gbif_citation.json and data/CITATION.md")
+        
+        # Generate species distribution maps
+        logging.info("Starting species distribution map generation...")
+        try:
+            from generate_species_maps import generate_all_species_maps
+            if generate_all_species_maps():
+                logging.info("Species distribution maps generated successfully!")
+                logging.info("Maps saved in: data/maps/")
+            else:
+                logging.warning("Failed to generate species distribution maps")
+        except ImportError as e:
+            logging.error(f"Could not import map generation module: {e}")
+            logging.error("Please ensure all dependencies are installed: pip install -r requirements.txt")
+        except Exception as e:
+            logging.error(f"Error generating maps: {e}")
     else:
         logging.error("Download failed")
 
