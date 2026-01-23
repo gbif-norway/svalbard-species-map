@@ -142,15 +142,21 @@ def download_all_species_with_doi(data_dir):
         if status == 'SUCCEEDED':
             download_info = occurrences.download_get(download_key)
             
-            # Check if download_info is a dictionary (which it should be)
-            if isinstance(download_info, dict) and 'downloadLink' in download_info:
-                download_url = download_info['downloadLink']
+            # Check if download_info is a dictionary and has a link or path
+            if isinstance(download_info, dict):
+                if 'downloadLink' in download_info:
+                    download_source = download_info['downloadLink']
+                elif 'path' in download_info:
+                    download_source = download_info['path']
+                else:
+                    logging.error(f"Download info missing both link and path: {download_info}")
+                    return None
             else:
                 logging.error(f"Unexpected download info format: {type(download_info)}")
                 return None
             
             # Read the CSV data
-            df = pd.read_csv(download_url)
+            df = pd.read_csv(download_source, sep='\t' if download_source.endswith('.csv') else ',')
             
             # Save combined file
             combined_file = data_dir / "all_species_occurrences.csv"

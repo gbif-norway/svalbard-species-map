@@ -28,11 +28,7 @@ NO_GEOSPATIAL_ISSUES = True
 # Species list
 SPECIES = [
     "Calanus finmarchicus",
-    "Calanus glacialis", 
-    "Parasagitta elegans",
-    "Semibalanus balanoides",
-    "Oithona similis",
-    "Catablema vesicarium"
+    "Calanus glacialis"
 ]
 
 # Map configuration for Svalbard region

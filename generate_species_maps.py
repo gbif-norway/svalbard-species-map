@@ -147,49 +147,47 @@ def create_species_map(species_name, grid_counts, lons, lats, output_path):
     # Create meshgrid for plotting
     lon_mesh, lat_mesh = np.meshgrid(lons, lats)
     
-    # Create custom colormap (orange to red for better visibility of low counts)
-    colors = ['orange', 'red', 'darkred']
-    n_bins = 100
-    cmap = LinearSegmentedColormap.from_list('species_cmap', colors, N=n_bins)
+    # Mask zero counts for better visualization
+    masked_counts = np.ma.masked_where(grid_counts == 0, grid_counts)
     
-    # Normalize data for better visualization
+    # Define discrete bins for the colorbar
+    # We want a log-like progression since counts vary significantly
     max_count = np.max(grid_counts)
-    if max_count > 0:
-        # Use linear scale from 1 to max_count for better visibility
-        norm = plt.Normalize(vmin=1, vmax=max_count)
+    if max_count <= 0:
+        max_count = 1
+        
+    if max_count <= 5:
+        boundaries = [1, 2, 3, 4, 5, 6]
+    elif max_count <= 20:
+        boundaries = [1, 2, 5, 10, 20, 21]
     else:
-        norm = plt.Normalize(vmin=0, vmax=1)
+        # Custom log-like bins
+        boundaries = [1, 2, 5, 10, 50, 100, 500, 1000, 5000, 10000]
+        boundaries = [b for b in boundaries if b <= max_count]
+        if max_count > boundaries[-1]:
+            boundaries.append(max_count + 1)
+        else:
+            boundaries[-1] = max_count + 1
+
+    # Use a high-contrast colormap with discrete steps
+    from matplotlib.colors import BoundaryNorm
+    cmap = plt.get_cmap('viridis', len(boundaries)-1)
+    norm = BoundaryNorm(boundaries, cmap.N)
     
     # Plot the grid cells
-    im = ax.pcolormesh(lon_mesh, lat_mesh, grid_counts, 
+    im = ax.pcolormesh(lon_mesh, lat_mesh, masked_counts, 
                       transform=ccrs.PlateCarree(),
-                      cmap=cmap, norm=norm, alpha=0.7)
+                      cmap=cmap, norm=norm, alpha=0.85, 
+                      edgecolor='white', linewidth=0.1)
     
     # Add colorbar with actual numbers
-    cbar = plt.colorbar(im, ax=ax, shrink=0.8, pad=0.02)
-    cbar.set_label('Number of Occurrences', fontsize=12)
+    cbar = plt.colorbar(im, ax=ax, shrink=0.7, pad=0.03, extend='max' if max_count >= boundaries[-1] else 'neither')
+    cbar.set_label('Number of Occurrences', fontsize=12, fontweight='bold')
     
-    # Format colorbar ticks to show actual numbers from 1 to max_count
-    if max_count > 0:
-        # Create tick positions for the colorbar
-        if max_count <= 10:
-            # For small counts, show every integer from 1 to max_count
-            tick_positions = np.arange(1, max_count + 1)
-        elif max_count <= 50:
-            # For medium counts, show 1 and then every 5th number
-            tick_positions = np.concatenate([[1], np.arange(5, max_count + 1, 5)])
-            if max_count not in tick_positions:
-                tick_positions = np.append(tick_positions, max_count)
-        else:
-            # For large counts, show 1, some intermediate values, and max_count
-            tick_positions = np.concatenate([[1], np.linspace(5, max_count-5, 4).astype(int), [max_count]])
-        
-        # Ensure we don't exceed max_count and remove duplicates
-        tick_positions = np.unique(tick_positions[tick_positions <= max_count])
-        
-        # Set the ticks and format them as integers
-        cbar.set_ticks(tick_positions)
-        cbar.set_ticklabels([str(int(tick)) for tick in tick_positions])
+    # Set the ticks to the boundaries for clarity
+    tick_locs = boundaries[:-1]
+    cbar.set_ticks(tick_locs)
+    cbar.set_ticklabels([str(int(b)) for b in tick_locs])
     
     # Add title
     plt.title(f'Distribution of {species_name}\nSvalbard Region ({MAP_RESOLUTION_KM}km resolution)', 
@@ -310,49 +308,43 @@ def create_combined_map(df, lons, lats):
     # Create meshgrid for plotting
     lon_mesh, lat_mesh = np.meshgrid(lons, lats)
     
-    # Create custom colormap (orange to red for better visibility of low counts)
-    colors = ['orange', 'red', 'darkred']
-    n_bins = 100
-    cmap = LinearSegmentedColormap.from_list('combined_cmap', colors, N=n_bins)
+    # Mask zero counts for better visualization
+    masked_counts = np.ma.masked_where(grid_counts == 0, grid_counts)
     
-    # Normalize data
+    # Define discrete bins for the colorbar
     max_count = np.max(grid_counts)
-    if max_count > 0:
-        # Use linear scale from 1 to max_count for better visibility
-        norm = plt.Normalize(vmin=1, vmax=max_count)
+    if max_count <= 0:
+        max_count = 1
+        
+    if max_count <= 10:
+        boundaries = [1, 2, 5, 10, 11]
     else:
-        norm = plt.Normalize(vmin=0, vmax=1)
+        boundaries = [1, 5, 10, 50, 100, 500, 1000, 5000, 10000]
+        boundaries = [b for b in boundaries if b <= max_count]
+        if max_count > boundaries[-1]:
+            boundaries.append(max_count + 1)
+        else:
+            boundaries[-1] = max_count + 1
+
+    # Use a high-contrast colormap with discrete steps
+    from matplotlib.colors import BoundaryNorm
+    cmap = plt.get_cmap('plasma', len(boundaries)-1)
+    norm = BoundaryNorm(boundaries, cmap.N)
     
     # Plot the grid cells
-    im = ax.pcolormesh(lon_mesh, lat_mesh, grid_counts, 
+    im = ax.pcolormesh(lon_mesh, lat_mesh, masked_counts, 
                       transform=ccrs.PlateCarree(),
-                      cmap=cmap, norm=norm, alpha=0.7)
+                      cmap=cmap, norm=norm, alpha=0.85,
+                      edgecolor='white', linewidth=0.1)
     
     # Add colorbar with actual numbers
-    cbar = plt.colorbar(im, ax=ax, shrink=0.8, pad=0.02)
-    cbar.set_label('Total Occurrences (All Species)', fontsize=12)
+    cbar = plt.colorbar(im, ax=ax, shrink=0.7, pad=0.03, extend='max' if max_count >= boundaries[-1] else 'neither')
+    cbar.set_label('Total Occurrences (All Species)', fontsize=12, fontweight='bold')
     
-    # Format colorbar ticks to show actual numbers from 1 to max_count
-    if max_count > 0:
-        # Create tick positions for the colorbar
-        if max_count <= 10:
-            # For small counts, show every integer from 1 to max_count
-            tick_positions = np.arange(1, max_count + 1)
-        elif max_count <= 50:
-            # For medium counts, show 1 and then every 5th number
-            tick_positions = np.concatenate([[1], np.arange(5, max_count + 1, 5)])
-            if max_count not in tick_positions:
-                tick_positions = np.append(tick_positions, max_count)
-        else:
-            # For large counts, show 1, some intermediate values, and max_count
-            tick_positions = np.concatenate([[1], np.linspace(5, max_count-5, 4).astype(int), [max_count]])
-        
-        # Ensure we don't exceed max_count and remove duplicates
-        tick_positions = np.unique(tick_positions[tick_positions <= max_count])
-        
-        # Set the ticks and format them as integers
-        cbar.set_ticks(tick_positions)
-        cbar.set_ticklabels([str(int(tick)) for tick in tick_positions])
+    # Set the ticks to the boundaries for clarity
+    tick_locs = boundaries[:-1]
+    cbar.set_ticks(tick_locs)
+    cbar.set_ticklabels([str(int(b)) for b in tick_locs])
     
     # Add title
     plt.title(f'Combined Species Distribution\nSvalbard Region ({MAP_RESOLUTION_KM}km resolution)', 

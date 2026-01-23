@@ -1,10 +1,10 @@
 # Svalbard Species Map - GBIF Data Pipeline
 
-This project downloads occurrence data from GBIF for six marine species found in the Svalbard region, with location precision within 20km. The pipeline uses GBIF's download API to generate a unique DOI for the entire dataset and creates species distribution maps for publication.
+This project downloads occurrence data from GBIF for two marine species found in the Svalbard region, with location precision within 20km. The pipeline uses GBIF's download API to generate a unique DOI for the entire dataset and creates species distribution maps for publication.
 
 ## Features
 
-- Downloads occurrence data for 6 marine species from GBIF
+- Downloads occurrence data for 2 marine species from GBIF
 - Filters data to ensure location precision within 20km
 - Uses GBIF download API to generate a unique DOI for the dataset
 - Generates high-resolution species distribution maps (20km x 20km resolution)
@@ -17,10 +17,6 @@ This project downloads occurrence data from GBIF for six marine species found in
 
 - Calanus finmarchicus
 - Calanus glacialis
-- Parasagitta elegans
-- Semibalanus balanoides
-- Oithona similis
-- Catablema vesicarium
 
 ## Prerequisites
 
@@ -104,7 +100,7 @@ The pipeline generates the following maps in `data/maps/`:
 - Coordinate uncertainty ≤ 20km
 - Has valid coordinates
 - No geospatial issues
-- All six target species
+- Both target species
 
 ## Citation Information
 
@@ -115,14 +111,14 @@ When using this data, please cite:
 
 **Current Citation:**
 ```
-GBIF.org (26 June 2025) GBIF Occurrence Download https://doi.org/10.15468/dl.dsk2rq
+GBIF.org (23 January 2026) GBIF Occurrence Download https://doi.org/10.15468/dl.famtsg
 ```
 
 **Download Information:**
-- **DOI**: [10.15468/dl.dsk2rq](https://doi.org/10.15468/dl.dsk2rq)
-- **Download URL**: [https://www.gbif.org/occurrence/download/0069778-250525065834625](https://www.gbif.org/occurrence/download/0069778-250525065834625)
-- **Total Records**: 77,536 occurrence records
-- **Datasets**: 155 datasets from 74 publishers across 23 countries
+- **DOI**: [10.15468/dl.famtsg](https://doi.org/10.15468/dl.famtsg)
+- **Download URL**: [https://www.gbif.org/occurrence/download/0005649-260120142942310](https://www.gbif.org/occurrence/download/0005649-260120142942310)
+- **Total Records**: 1,761 occurrence records
+- **Datasets**: 31 datasets from 17 publishers across 10 countries
 
 ## Docker Commands
 
